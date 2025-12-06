@@ -1,90 +1,53 @@
-import os
-import time
-from selene import browser, have, be, by, query
-from selene.core.command import js
+from qa_guru_homework_9.pages.registration_page import RegistrationPage
 
 
 def test_fill_submit_form(setup_browser):
-    browser.open('https://demoqa.com/automation-practice-form')
-    browser.element(by.text('Practice Form')).should(be.visible)  # Ждем заголовок
+    registration_page = RegistrationPage()
+    registration_page.open()
 
 # Заполняем основные данные
-    browser.element('#firstName').type('Alex')
-    browser.element('#lastName').type('Bagel')
-    browser.element('#userEmail').type('alexbagel@mail.ru')
-    browser.element(by.text('Male')).click()
-    browser.element('#userNumber').type('9021778990')
+    registration_page.type_first_name('Alex')
+    registration_page.type_last_name('Bagel')
+    registration_page.type_user_email('alexbagel@mail.ru')
+    registration_page.check_male('Male')
+    registration_page.type_user_number('9021778990')
 
 # Заполняем дату рождения
-    browser.element('#dateOfBirthInput').click()
-    browser.element('.react-datepicker').should(be.visible)
-    browser.element('.react-datepicker__month-select').click()
-    browser.element('.react-datepicker__month-select option[value="5"]').click()
-    browser.element('.react-datepicker__year-select').click()
-    browser.element('.react-datepicker__year-select option[value="1990"]').click()
-    browser.element('.react-datepicker__day--019:not(.react-datepicker__day--outside-month)').click()
-    browser.element('#dateOfBirthInput').should(have.value('19 Jun 1990'))
+    registration_page.type_date_of_birth('1990', 'Jun', 19)
 
 # Выбираем предмет
-    browser.element('#subjectsInput').type('English')
-    browser.element('.subjects-auto-complete__menu').with_(timeout=5).should(be.visible)
-    browser.all('.subjects-auto-complete__option').first.click()
+    registration_page.check_subject('English')
 
 # Выбираем хобби
-    browser.element(by.text('Sports')).click()
-    browser.element(by.text('Music')).click()
+    registration_page.check_hobbie('Sports')
 
 # Загружаем файл
-    browser.element('#uploadPicture').send_keys(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mount.jpg'))
+    registration_page.upload_picture('mount.jpg')
 
 # Заполняем адрес
-    browser.element('#currentAddress').type('Lomonosov str. 8')
-    browser.element('#submit').perform(js.scroll_into_view)
+    registration_page.type_street_address('Lomonosov str. 8')
 
-    browser.element('#state').click()
-    browser.element('.css-26l3qy-menu').with_(timeout=5).should(be.visible)
-    browser.element('#react-select-3-option-2').click()
+    registration_page.check_state_address('Haryana')
 
-    browser.element('#city').click()
-    browser.element('.css-26l3qy-menu').with_(timeout=5).should(be.visible)
-    browser.element('#react-select-4-option-1').click()
+    registration_page.check_city_address('Panipat')
 
 # Отправляем форму
-    browser.element('#submit').click()
+    registration_page.submit_form()
 
 # Проверяем успешную отправку формы
-    #browser.element('#example-modal-sizes-title-lg').should(have.exact_text('Thanks for submitting the form'))(be.visible)
-
-    expected_data = {
+    registration_page.should_registered_user_info({
         "Student Name": "Alex Bagel",
         "Student Email": "alexbagel@mail.ru",
         "Gender": "Male",
         "Mobile": "9021778990",
         "Date of Birth": "19 June,1990",
         "Subjects": "English",
-        "Hobbies": "Sports, Music",
+        "Hobbies": "Sports",
         "Picture": "mount.jpg",
         "Address": "Lomonosov str. 8",
         "State and City": "Haryana Panipat"
     }
+    )
 
-    # Получаем все строки таблицы
-    rows = browser.all('tbody tr')
 
-    for row in rows:
-        # Получаем ячейки в строке
-        cells = row.all('td')
-        if cells.should(have.size(2)):
-            field_name = cells.first.get(query.text)
-            actual_value = cells.second.get(query.text)
 
-            # Проверяем, есть ли поле в ожидаемых данных
-            if field_name in expected_data:
-                expected_value = expected_data[field_name]
-                assert actual_value == expected_value, (
-                    f"Поле '{field_name}': ожидалось '{expected_value}', "
-                    f"получено '{actual_value}'"
-                )
-                print(f"✓ {field_name}: {actual_value}")
-
-    time.sleep(10)
