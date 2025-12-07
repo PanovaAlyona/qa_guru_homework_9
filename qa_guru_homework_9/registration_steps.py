@@ -82,7 +82,7 @@ class RegistrationSteps:
             "Student Email": user.email,
             "Gender": user.gender,
             "Mobile": user.mobile_number,
-            "Date of Birth": user.date_of_birth.strftime("%d %B") +', ' + user.date_of_birth.strftime("%Y"),
+            "Date of Birth": user.date_of_birth.strftime("%d %B") +',' + user.date_of_birth.strftime("%Y"),
             "Subjects": user.subject,
             "Hobbies": user.hobbies,
             "Picture": os.path.basename(user.picture),
